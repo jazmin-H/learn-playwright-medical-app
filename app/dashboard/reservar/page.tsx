@@ -46,22 +46,35 @@ import {
 
 const appointmentSchema = z.object({
   specialty: z.string({ required_error: "Seleccione una especialidad" }),
-  doctorId: z.string({ required_error: "Seleccione un médico" }),
+  doctorId: z.number({ required_error: "Seleccione un médico" }),
   date: z.date({ required_error: "Seleccione una fecha" }),
   timeSlot: z.string({ required_error: "Seleccione un horario" }),
 });
 
+type Doctor = {
+  id: number;
+  name: string;
+};
+
+type Specialty = {
+  id: string;
+  name: string;
+};
+
 export default function ReservarTurnoPage() {
-  const [specialties, setSpecialties] = useState<
-    { id: string; name: string }[]
-  >([]);
-  const [doctors, setDoctors] = useState<{ id: string; name: string }[]>([]);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof appointmentSchema>>({
     resolver: zodResolver(appointmentSchema),
+    defaultValues: {
+      doctorId: undefined,
+      specialty: "",
+      timeSlot: "",
+    },
   });
 
   // Fetch specialties on component mount
@@ -82,23 +95,26 @@ export default function ReservarTurnoPage() {
     fetchSpecialties();
   }, []);
 
-  // Fetch doctors when specialty changes
-  const onSpecialtyChange = async (value: string) => {
-    try {
-      const data = await getDoctorsBySpecialty(value);
-      setDoctors(data);
-      form.setValue("doctorId", "");
-      form.setValue("date", undefined as any);
-      form.setValue("timeSlot", "");
-      setTimeSlots([]);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar los médicos",
-        variant: "destructive",
-      });
-    }
-  };
+// Fetch doctors when specialty changes
+const onSpecialtyChange = async (value: string) => {
+  try {
+    const data = await getDoctorsBySpecialty(value);
+    setDoctors(data.map((d: { id: number | string; name: string }) => ({
+      id: Number(d.id), // Conversión explícita a number
+      name: d.name
+    })));
+    form.resetField("doctorId");
+    form.resetField("date");
+    form.resetField("timeSlot");
+    setTimeSlots([]);
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "No se pudieron cargar los médicos",
+      variant: "destructive",
+    });
+  }
+};
 
   // Fetch available time slots when date changes
   const onDateChange = async (date: Date) => {
@@ -108,7 +124,7 @@ export default function ReservarTurnoPage() {
     try {
       const data = await getAvailableTimeSlots(doctorId, date);
       setTimeSlots(data);
-      form.setValue("timeSlot", "");
+      form.resetField("timeSlot");
     } catch (error) {
       toast({
         title: "Error",
@@ -118,9 +134,13 @@ export default function ReservarTurnoPage() {
     }
   };
 
-  async function onSubmit(values: z.infer<typeof appointmentSchema>) {
+  async function onSubmit(rawValues: z.infer<typeof appointmentSchema>) {
     setIsLoading(true);
     try {
+      const values = {
+        ...rawValues,
+        doctorId: Number(rawValues.doctorId)
+      };
       await createAppointment(values);
 
       toast({
@@ -192,8 +212,10 @@ export default function ReservarTurnoPage() {
                   <FormItem>
                     <FormLabel>Médico</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(Number(value));
+                      }}
+                      value={field.value?.toString()}
                       disabled={!form.getValues("specialty")}
                     >
                       <FormControl>
@@ -203,7 +225,7 @@ export default function ReservarTurnoPage() {
                       </FormControl>
                       <SelectContent>
                         {doctors.map((doctor) => (
-                          <SelectItem key={doctor.id} value={doctor.id}>
+                          <SelectItem key={doctor.id} value={doctor.id.toString()}>
                             Dr. {doctor.name}
                           </SelectItem>
                         ))}
@@ -254,7 +276,6 @@ export default function ReservarTurnoPage() {
                             today.setHours(0, 0, 0, 0);
                             const day = date.getDay();
                             return date < today || day === 0 || day === 6;
-                            // return date < today;
                           }}
                         />
                       </PopoverContent>

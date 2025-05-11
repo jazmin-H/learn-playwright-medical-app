@@ -25,3 +25,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+package-lock.json
+package.json
+prisma/migrations/20250509024822_init/migration.sql
+prisma/migrations/20250510180551_prevent_duplicate_appointments/migration.sql
+prisma/migrations/20250510185500_init/migration.sql
+prisma/dev.db
+prisma/migrations/migration_lock.toml
