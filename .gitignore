@@ -39,3 +39,5 @@ prisma/migrations/20250510180551_prevent_duplicate_appointments/migration.sql
 prisma/migrations/20250510185500_init/migration.sql
 prisma/dev.db
 prisma/migrations/migration_lock.toml
+prisma/migrations/20250512165112_especialidades/migration.sql
+prisma/test.db

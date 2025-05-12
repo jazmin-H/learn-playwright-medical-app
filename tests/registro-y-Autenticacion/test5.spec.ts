@@ -1,0 +1,32 @@
+import { test, expect } from '@playwright/test';
+
+test('error en registro con el numero de telefono', async ({ page }) => {
+    await page.goto('http://localhost:3000/register');
+    await page.getByRole('textbox', { name: 'Email' }).click();
+    await page.getByRole('textbox', { name: 'Email' }).fill('ono@gmail.com');
+    await page.getByRole('textbox', { name: 'Teléfono' }).click();
+    await page.getByRole('textbox', { name: 'Teléfono' }).fill('1138430099');
+    await page.getByRole('textbox', { name: 'Contraseña', exact: true }).click();
+    await page.getByRole('textbox', { name: 'Contraseña', exact: true }).fill('47131851');
+    await page.getByRole('textbox', { name: 'Confirmar contraseña' }).click();
+    await page.getByRole('textbox', { name: 'Confirmar contraseña' }).fill('47131851');
+    await page.getByRole('button', { name: 'Registrarse' }).click();
+    await expect(page.getByText('Nombre completoEl nombre debe')).toBeVisible();
+    await page.goto('http://localhost:3000/register');
+    await page.getByRole('textbox', { name: 'Nombre completo' }).click();
+    await page.goto('http://localhost:3000/register');
+    await page.getByRole('textbox', { name: 'Nombre completo' }).click();
+    await page.getByRole('textbox', { name: 'Nombre completo' }).fill('osi');
+    await page.getByRole('textbox', { name: 'Email' }).click();
+    await page.getByRole('textbox', { name: 'Email' }).fill('');
+    await page.getByRole('textbox', { name: 'Teléfono' }).click();
+    await page.getByRole('textbox', { name: 'Teléfono' }).fill('3746990');
+    await page.getByRole('textbox', { name: 'Contraseña', exact: true }).click();
+    await page.getByRole('textbox', { name: 'Contraseña', exact: true }).fill('47131851');
+    await page.getByRole('textbox', { name: 'Confirmar contraseña' }).click();
+    await page.getByRole('textbox', { name: 'Confirmar contraseña' }).fill('47131851');
+    await page.getByRole('button', { name: 'Registrarse' }).click();
+    await expect(page.getByText('EmailIngrese un email válido')).toBeVisible();
+    await page.goto('http://localhost:3000/register');
+    await expect(page.getByText('TeléfonoIngrese un número de')).toBeVisible();
+});
