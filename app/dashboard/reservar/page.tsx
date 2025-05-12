@@ -46,38 +46,24 @@ import {
 
 const appointmentSchema = z.object({
   specialty: z.string({ required_error: "Seleccione una especialidad" }),
-  doctorId: z.number({ required_error: "Seleccione un médico" }),
+  doctorId: z.string({ required_error: "Seleccione un médico" }),
   date: z.date({ required_error: "Seleccione una fecha" }),
   timeSlot: z.string({ required_error: "Seleccione un horario" }),
 });
 
-type Doctor = {
-  id: number;
-  name: string;
-};
-
-type Specialty = {
-  id: string;
-  name: string;
-};
-
 export default function ReservarTurnoPage() {
-  const [specialties, setSpecialties] = useState<Specialty[]>([]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [specialties, setSpecialties] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [doctors, setDoctors] = useState<{ id: string; name: string }[]>([]);
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof appointmentSchema>>({
     resolver: zodResolver(appointmentSchema),
-    defaultValues: {
-      doctorId: undefined,
-      specialty: "",
-      timeSlot: "",
-    },
   });
 
-  // Fetch specialties on component mount
   useEffect(() => {
     const fetchSpecialties = async () => {
       try {
@@ -95,28 +81,23 @@ export default function ReservarTurnoPage() {
     fetchSpecialties();
   }, []);
 
-// Fetch doctors when specialty changes
-const onSpecialtyChange = async (value: string) => {
-  try {
-    const data = await getDoctorsBySpecialty(value);
-    setDoctors(data.map((d: { id: number | string; name: string }) => ({
-      id: Number(d.id), // Conversión explícita a number
-      name: d.name
-    })));
-    form.resetField("doctorId");
-    form.resetField("date");
-    form.resetField("timeSlot");
-    setTimeSlots([]);
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "No se pudieron cargar los médicos",
-      variant: "destructive",
-    });
-  }
-};
+  const onSpecialtyChange = async (value: string) => {
+    try {
+      const data = await getDoctorsBySpecialty(value);
+      setDoctors(data);
+      form.setValue("doctorId", "");
+      form.setValue("date", undefined as any);
+      form.setValue("timeSlot", "");
+      setTimeSlots([]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar los médicos",
+        variant: "destructive",
+      });
+    }
+  };
 
-  // Fetch available time slots when date changes
   const onDateChange = async (date: Date) => {
     const doctorId = form.getValues("doctorId");
     if (!doctorId) return;
@@ -124,7 +105,7 @@ const onSpecialtyChange = async (value: string) => {
     try {
       const data = await getAvailableTimeSlots(doctorId, date);
       setTimeSlots(data);
-      form.resetField("timeSlot");
+      form.setValue("timeSlot", "");
     } catch (error) {
       toast({
         title: "Error",
@@ -134,13 +115,9 @@ const onSpecialtyChange = async (value: string) => {
     }
   };
 
-  async function onSubmit(rawValues: z.infer<typeof appointmentSchema>) {
+  async function onSubmit(values: z.infer<typeof appointmentSchema>) {
     setIsLoading(true);
     try {
-      const values = {
-        ...rawValues,
-        doctorId: Number(rawValues.doctorId)
-      };
       await createAppointment(values);
 
       toast({
@@ -148,11 +125,21 @@ const onSpecialtyChange = async (value: string) => {
         description: "Tu turno ha sido reservado exitosamente",
       });
 
-      router.push("/dashboard");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 300);
     } catch (error: any) {
+      let message = "Ocurrió un error al reservar el turno";
+      if (
+        error.message &&
+        error.message.includes("UNIQUE constraint failed: Appointment")
+      ) {
+        message = "Ya tienes un turno reservado en ese horario";
+      }
+
       toast({
         title: "Error al reservar turno",
-        description: error.message || "Ocurrió un error al reservar el turno",
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -212,10 +199,8 @@ const onSpecialtyChange = async (value: string) => {
                   <FormItem>
                     <FormLabel>Médico</FormLabel>
                     <Select
-                      onValueChange={(value) => {
-                        field.onChange(Number(value));
-                      }}
-                      value={field.value?.toString()}
+                      onValueChange={field.onChange}
+                      value={field.value}
                       disabled={!form.getValues("specialty")}
                     >
                       <FormControl>
@@ -225,8 +210,8 @@ const onSpecialtyChange = async (value: string) => {
                       </FormControl>
                       <SelectContent>
                         {doctors.map((doctor) => (
-                          <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                            Dr. {doctor.name}
+                          <SelectItem key={doctor.id} value={doctor.id}>
+                            {doctor.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -249,7 +234,7 @@ const onSpecialtyChange = async (value: string) => {
                             variant={"outline"}
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
+                              !field.value && "text-muted-foreground"
                             )}
                             disabled={!form.getValues("doctorId")}
                           >
@@ -271,7 +256,6 @@ const onSpecialtyChange = async (value: string) => {
                             if (date) onDateChange(date);
                           }}
                           disabled={(date) => {
-                            // Disable past dates and weekends
                             const today = new Date();
                             today.setHours(0, 0, 0, 0);
                             const day = date.getDay();
