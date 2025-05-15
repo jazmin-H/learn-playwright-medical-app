@@ -5,7 +5,7 @@ const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
 
-async function globalTeardown() {
+(async function globalTeardown() {
   try {
     console.log("🧹 Ejecutando globalTeardown...");
     await eliminarTodo(prisma)
@@ -16,6 +16,5 @@ async function globalTeardown() {
   } finally {
     await prisma.$disconnect();
   }
-}
+})()
 
-export default globalTeardown;
