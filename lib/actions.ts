@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 
 const prisma = new PrismaClient();
@@ -23,26 +24,25 @@ export async function registerUser(userData: {
     where: { email: userData.email },
   });
 
-
   if (existingUser) {
     throw new Error("El usuario ya está registrado.");
   }
 
+  // Hashea la contraseña antes de guardarla
+  const hashedPassword = await bcrypt.hash(userData.password, 10); // 10 es el "salt rounds"
 
   const newUser = await prisma.user.create({
     data: {
       name: userData.name,
       email: userData.email,
       phone: userData.phone,
-      password: userData.password, // En producción, encripta la contraseña
+      password: hashedPassword, // Guarda el hash, no el texto plano
     },
   });
-
 
   console.log("Nuevo usuario creado:", newUser);
   return { success: true };
 }
-
 
 export async function loginUser({
   email,
@@ -55,11 +55,16 @@ export async function loginUser({
     where: { email: email },
   });
 
-
-  if (!user || user.password !== password) {
+  if (!user) {
     throw new Error("Credenciales inválidas");
   }
 
+  // Compara la contraseña ingresada con el hash almacenado
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new Error("Credenciales inválidas");
+  }
 
   (await cookies()).set(
     "session",
@@ -70,10 +75,8 @@ export async function loginUser({
     })
   );
 
-
   return { success: true };
 }
-
 
 export async function logoutUser() {
   (await cookies()).delete("session");
