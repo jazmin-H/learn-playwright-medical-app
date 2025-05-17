@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('error de registro por falta de contraseña', async ({ page }) => {
+test('Error de registro por falta de contraseña', async ({ page }) => {
   await page.goto('http://localhost:3000/register');
   await page.getByRole('textbox', { name: 'Nombre completo' }).click();
   await page.getByRole('textbox', { name: 'Nombre completo' }).fill('Juan Pérez');

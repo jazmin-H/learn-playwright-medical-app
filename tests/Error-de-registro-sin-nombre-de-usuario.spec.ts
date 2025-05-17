@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('error de registro sin nombre de usuario', async ({ page }) => {
+test('Error de registro sin nombre de usuario', async ({ page }) => {
   await page.goto('http://localhost:3000/register');
   await page.getByRole('textbox', { name: 'Email' }).click();
   await page.getByRole('textbox', { name: 'Email' }).fill('maria.garcia@mail.com');

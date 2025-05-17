@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Verificar si estan los titulos del formulario de registro para completar', async ({ page }) => {
+test('Verificacion si estan los titulos del formulario de registro para completar', async ({ page }) => {
     await page.goto('http://localhost:3000/register');
     await expect(page.locator('form')).toContainText('Nombre completo');
     await expect(page.locator('form')).toContainText('Email');

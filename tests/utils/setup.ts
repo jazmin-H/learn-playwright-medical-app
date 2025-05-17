@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { hash } from 'bcryptjs'; // ← Añade esto
 import { crearCitas, crearDoctores, crearEspecialidades, crearUsuarios, eliminarTodo } from "./global-setup";
 
 

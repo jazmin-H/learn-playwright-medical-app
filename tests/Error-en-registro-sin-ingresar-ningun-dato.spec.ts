@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('error en registro sin ingresar ningun dato ', async ({ page }) => {
+test('Error en registro sin ingresar ningun dato', async ({ page }) => {
   await page.goto('http://localhost:3000/register');
   await page.getByRole('button', { name: 'Registrarse' }).click();
   await expect(page.getByText('Nombre completoEl nombre debe')).toBeVisible();
