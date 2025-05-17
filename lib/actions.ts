@@ -142,10 +142,10 @@ export async function createAppointment(data: {
   }
 
 
+  // 🔥 Validación clave (quitamos doctorId del filtro)
   const existingAppointment = await prisma.appointment.findFirst({
     where: {
-      userId: session.userId,
-      doctorId: data.doctorId,
+      userId: session.userId,  // <-- Solo usuario, fecha y hora
       date: data.date,
       time: data.timeSlot,
     },
@@ -154,7 +154,8 @@ export async function createAppointment(data: {
 
   if (existingAppointment) {
     throw new Error(
-      "Ya tienes un turno reservado en este horario. Cancela el turno existente para reservar uno nuevo."
+      "❌ Ya tienes un turno reservado en este horario (aunque sea con otro médico). " +
+      "Cancela el turno existente para reservar uno nuevo."
     );
   }
 
