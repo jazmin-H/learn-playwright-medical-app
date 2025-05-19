@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Revisamiento de los titulos como los turnos ya confirmados', async ({ page }) => {
+test('Revisamiento de los datos del turno ya confirmado', async ({ page }) => {
     await page.goto('http://localhost:3000/');
     await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
     await page.getByRole('textbox', { name: 'Email' }).click();
@@ -10,20 +10,23 @@ test('Revisamiento de los titulos como los turnos ya confirmados', async ({ page
     await page.getByRole('textbox', { name: 'Contraseña' }).fill('PacienteSeguro456!');
     await page.getByRole('button', { name: 'Iniciar sesión' }).click();
     await page.getByRole('button', { name: 'Reservar nuevo turno' }).click();
+    await page.goto('http://localhost:3000/dashboard/reservar');
     await page.getByRole('combobox', { name: 'Especialidad' }).click();
-    await page.getByRole('option', { name: 'Neurología' }).click();
-    await page.getByRole('combobox', { name: 'Especialidad' }).click();
+    await page.getByRole('option', { name: 'Ginecología' }).click();
     await page.getByRole('combobox', { name: 'Médico' }).click();
-    await page.getByRole('option', { name: 'Dr. Ricardo Mendoza' }).click();
+    await page.getByRole('option', { name: 'Dra. María González' }).click();
     await page.getByRole('button', { name: 'Fecha' }).click();
-    await page.getByRole('button', { name: 'Friday, May 30th,' }).click();
+    await page.getByRole('gridcell', { name: 'Wednesday, May 28th,' }).click();
     await page.getByRole('combobox', { name: 'Horario' }).click();
     await page.getByRole('option', { name: '10:00' }).click();
-    await page.getByRole('combobox', { name: 'Horario' }).click();
     await page.getByRole('button', { name: 'Reservar turno' }).click();
     await page.goto('http://localhost:3000/dashboard');
+    await expect(page.getByRole('main')).toContainText('Ginecología');
+    await expect(page.getByRole('main')).toContainText('Dra. María González');
+    await expect(page.getByRole('main')).toContainText('28/05/2025');
+    await expect(page.getByRole('main')).toContainText('10:00');
     await expect(page.getByRole('main')).toContainText('Neurología');
     await expect(page.getByRole('main')).toContainText('Dr. Ricardo Mendoza');
-    await expect(page.getByRole('main')).toContainText('30/05/2025');
+    await expect(page.getByRole('main')).toContainText('27/05/2025');
     await expect(page.getByRole('main')).toContainText('10:00');
 });

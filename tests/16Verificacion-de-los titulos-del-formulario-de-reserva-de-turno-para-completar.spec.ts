@@ -9,6 +9,7 @@ test('Verificacion si estan los titulos del formulario de reserva de turno para 
   await page.getByRole('textbox', { name: 'Contraseña' }).fill('PacienteSeguro456!');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await page.getByRole('button', { name: 'Reservar nuevo turno' }).click();
+  await page.goto('http://localhost:3000/dashboard/reservar');
   await expect(page.getByRole('heading')).toContainText('Reservar Turno');
   await expect(page.getByRole('main')).toContainText('Datos del turno');
   await expect(page.getByRole('main')).toContainText('Selecciona la especialidad, médico, fecha y horario para tu consulta');

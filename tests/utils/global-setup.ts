@@ -134,7 +134,15 @@ export async function crearCitas(prisma: PrismaClient) {
                 date: new Date("2025-05-29"),
                 time: "11:30",
 
-            }
+            },
+            {
+                userId: "usr-pac-03",
+                doctorId: "dra-maria-gonzalez",
+                specialtyId: "ginecologia",
+                date: new Date("2025-05-28"),
+                time: "10:00",
+
+            },
         ],
     });
 

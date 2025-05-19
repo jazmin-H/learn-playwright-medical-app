@@ -202,6 +202,7 @@ export default function ReservarTurnoPage() {
                       onValueChange={field.onChange}
                       value={field.value}
                       disabled={!form.getValues("specialty")}
+                      
                     >
                       <FormControl>
                         <SelectTrigger>
