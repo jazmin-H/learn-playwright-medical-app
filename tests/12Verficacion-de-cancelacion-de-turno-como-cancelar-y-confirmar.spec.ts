@@ -4,9 +4,9 @@ test('Verficacion de cancelacion de turno como cancelar y confirmar', async ({ p
   await page.goto('http://localhost:3000/');
   await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
   await page.getByRole('textbox', { name: 'Email' }).click();
-  await page.getByRole('textbox', { name: 'Email' }).fill('juan.perez@mail.com');
+  await page.getByRole('textbox', { name: 'Email' }).fill('maria.garcia@mail.com');
   await page.getByRole('textbox', { name: 'Contraseña' }).click();
-  await page.getByRole('textbox', { name: 'Contraseña' }).fill('PacienteSeguro456!');
+  await page.getByRole('textbox', { name: 'Contraseña' }).fill('MariaPassword789!');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await page.getByRole('button', { name: 'Cancelar turno' }).click();
   await expect(page.getByLabel('¿Estás seguro?')).toContainText('¿Estás seguro?Esta acción no se puede deshacer. El turno será cancelado permanentemente.');
